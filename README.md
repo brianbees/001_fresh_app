@@ -1,38 +1,78 @@
-# Uni App - 2 (Clean Package)
+# 001_fresh_app
 
-This is the clean, verified package matching our **Master Index** and current plan.
+University Challenge Scoring App (Uni App – 2)  
+Fresh baseline build — React Native + Expo
 
-## Quick Start
+---
 
-1. **Install deps (one-time if not yet done):**  
-```
-npx expo install @react-navigation/native @react-navigation/bottom-tabs @react-navigation/native-stack react-native-screens react-native-safe-area-context react-native-gesture-handler react-native-reanimated react-native-get-random-values expo-sqlite
-```
+## Project Overview
+This app is a clean rebuild of the University Challenge scoring system.  
+It’s built with React Native (Expo), using a persistent SQLite database and a responsive layout that works across phones and tablets.
 
-2. **Run (cache clear):**  
-```
-npx expo start -c
-```
+### Core Features
+- Player Selection (1–6 players)  
+- Score tab with adaptive team grid  
+- Undo & Reset per player  
+- Save Match (stores sessions in local DB)  
+- History tab with past results  
+- Settings tab (app options, contact/legal)  
+- Gradient background + accent colours  
+- Safe-area aware (phones & tablets)  
 
-3. **Dev Version Label**  
-Shows at the bottom of the **Player Selection** screen in dev, reading from `src/version.json`.
+---
 
-4. **Regenerate version meta (optional):**  
-```
-node scripts/gen-version-meta.js
-```
+## Setup Instructions
 
-## Whatâ€™s Inside
+Clone the repository:
 
-- `App.js` â€” Stack (PlayerSelect â†’ MainTabs) + tabs (Score | History | Settings), DB init.
-- `src/screens/PlayerSelectionScreen.js` â€” 1â€“6 players entry + dev version label.
-- `src/screens/ScoreScreen.js` â€” dynamic 1â€“6 teams, Reset All, Save Match â†’ SQLite.
-- `src/screens/HistoryScreen.js` â€” list/refresh/clear sessions.
-- `src/screens/SettingsScreen.js` â€” placeholder.
-- `src/components/DevVersionLabel.js` â€” reads `src/version.json`, only in dev.
-- `src/storage/db.js` â€” modern async expo-sqlite with safe fallbacks.
-- `src/version.json` â€” generated meta (v1.0.0, dev.4, timestamp, commit local).
-- `scripts/gen-version-meta.js` â€” helper to regenerate `src/version.json`.
-- `TREE.MD` â€” exact file manifest for QA.
+git clone https://github.com/brianbees/001_fresh_app.git  
+cd 001_fresh_app  
 
-Generated: 2025-09-01 06:32
+Install dependencies:
+
+npm install  
+npx expo install  
+
+Run the app:
+
+npx expo start  
+
+---
+
+## Git Workflow
+
+### Create a checkpoint:
+
+git add -A  
+git commit -m "Describe your change"  
+git tag v0.1.X-description-YYYY-MM-DD  
+git push && git push --tags  
+
+### Roll back to a checkpoint:
+
+git checkout -b restore/<tagname> <tagname>  
+npm ci  
+npx expo install  
+npx expo start -c  
+
+---
+
+## Project Structure
+
+- App.js — root navigation (PlayerSelect -> MainTabs)  
+- src/ — screens, components, storage  
+- assets/ — images, sounds  
+- scripts/ — helper scripts (e.g. version metadata)  
+- TREE.MD — manifest of file structure  
+
+---
+
+## Tags / Checkpoints
+
+- v0.1.0-001_fresh_app-2025-09-01 — Initial baseline commit  
+- v0.1.1-gitignore-update-2025-09-01 — Updated .gitignore rules  
+
+---
+
+## License
+Currently private use only.
