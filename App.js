@@ -1,11 +1,11 @@
 import React from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator, BottomTabBar } from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Screens (unchanged)
+// Screens (unchanged; assumed present)
 import PlayerSelectionScreen from "./src/screens/PlayerSelectionScreen";
 import ScoreScreen from "./src/screens/ScoreScreen";
 import HistoryScreen from "./src/screens/HistoryScreen";
@@ -15,69 +15,52 @@ const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
 
 /**
- * Custom wrapper around the default BottomTabBar:
- * - Renders a coloured layer ONLY above the bottom system inset.
- * - Leaves the Android gesture area fully transparent.
- * - Adds a 1px black top border.
- * - Keeps all default tab behaviour (labels, icons, animations).
+ * TabBarBackground stops at the bottom safe-area inset:
+ * - We draw the coloured background ONLY from the top of the tab bar
+ *   down to (bottom - insets.bottom), leaving the gesture area untouched.
+ * - 1px black top border per spec.
  */
-function MyTabBar(props) {
+function TabBarBackground() {
   const insets = useSafeAreaInsets();
   return (
-    <View style={styles.tabWrapper} pointerEvents="box-none">
-      {/* Background layer: fill bar area EXCLUDING the bottom inset */}
+    <View style={{ flex: 1, backgroundColor: "transparent" }}>
       <View
         pointerEvents="none"
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: "transparent",
-          },
-        ]}
-      >
-        {/* Top border */}
-        <View style={styles.topBorder} />
-
-        {/* Coloured strip — stops at the top of the system inset */}
-        <View
-          style={[
-            styles.colourFill,
-            {
-              position: "absolute",
-              top: 1,
-              left: 0,
-              right: 0,
-              bottom: insets.bottom, // do NOT paint into gesture area
-            },
-          ]}
-        />
-      </View>
-
-      {/* The real tab bar (kept transparent so our background shows through) */}
-      <BottomTabBar
-        {...props}
-        style={[
-          props.style,
-          {
-            backgroundColor: "transparent",
-            borderTopWidth: 0,
-            ...(Platform.OS === "android" ? { elevation: 0 } : null),
-          },
-        ]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          // Leave the bottom inset area unpainted:
+          bottom: insets.bottom,
+          backgroundColor: "#c0ebf9",
+          borderTopWidth: 1,
+          borderTopColor: "black",
+          ...(Platform.OS === "android" ? { elevation: 0 } : null),
+        }}
       />
     </View>
   );
 }
 
+/**
+ * Simple, compliant setup:
+ * - Do NOT alter headers or other UI.
+ * - tabBarStyle is transparent; background is drawn via TabBarBackground,
+ *   which respects safe areas.
+ */
 function MainTabs() {
   return (
     <Tabs.Navigator
-      // Use our wrapper; keep defaults otherwise.
-      tabBar={(tabProps) => <MyTabBar {...tabProps} />}
       screenOptions={{
         headerShown: false,
-        // Make sure nothing behind the tabs peeks through as white.
-        sceneContainerStyle: { backgroundColor: "transparent" },
+        tabBarStyle: [
+          {
+            backgroundColor: "transparent", // background drawn by TabBarBackground
+            borderTopWidth: 0,              // border handled by TabBarBackground
+          },
+        ],
+        tabBarBackground: () => <TabBarBackground />,
       }}
     >
       <Tabs.Screen name="Score" component={ScoreScreen} />
@@ -107,21 +90,3 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  tabWrapper: {
-    // Wrapper is transparent; we draw the strip in our own background layer.
-    backgroundColor: "transparent",
-  },
-  topBorder: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: "black",
-  },
-  colourFill: {
-    backgroundColor: "#c0ebf9",
-  },
-});
