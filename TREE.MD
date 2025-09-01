@@ -1,17 +1,21 @@
-Root
+/
 ├─ App.js
-├─ README.md
-├─ TREE.MD
+├─ index.js
+├─ styles.js
+├─ package.json
+├─ app.json
+├─ babel.config.js
+├─ README.txt
 ├─ scripts/
 │  └─ gen-version-meta.js
 └─ src/
-   ├─ version.json
-   ├─ storage/
-   │  └─ db.js
+   ├─ version-meta.json
    ├─ components/
-   │  └─ DevVersionLabel.js
-   └─ screens/
-      ├─ PlayerSelectionScreen.js
-      ├─ ScoreScreen.js
-      ├─ HistoryScreen.js
-      └─ SettingsScreen.js
+   │  └─ DevVersionPill.js
+   ├─ screens/
+   │  ├─ PlayerSelectionScreen.js
+   │  ├─ ScoreScreen.js
+   │  ├─ HistoryScreen.js
+   │  └─ SettingsScreen.js
+   └─ storage/
+      └─ db.js

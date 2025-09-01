@@ -1,46 +1,46 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
-import DevVersionLabel from "../components/DevVersionLabel";
+﻿import React from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-const counts = [1, 2, 3, 4, 5, 6];
-
-export default function PlayerSelectionScreen({ navigation }) {
-  const onPick = (n) => {
-    navigation.replace("MainTabs", { screen: "Score", params: { players: n } });
+export default function PlayerSelectionScreen() {
+  const nav = useNavigation();
+  const go = (players) => {
+    nav.navigate("MainTabs", { screen: "Score", params: { players } });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>How many players?</Text>
-      <FlatList
-        data={counts}
-        keyExtractor={(x) => String(x)}
-        numColumns={3}
-        columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ gap: 12 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.btn} onPress={() => onPick(item)}>
-            <Text style={styles.btnText}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
-      <DevVersionLabel />
+    <View style={styles.wrap}>
+      <Text style={styles.title}>Select Players</Text>
+      <View style={styles.grid}>
+        {[1,2,3,4,5,6].map((n) => (
+          <Pressable
+            key={n}
+            onPress={() => go(n)}
+            style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+          >
+            <Text style={styles.btnText}>{n}</Text>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: 20, gap: 16 },
-  title: { fontSize: 22, fontWeight: "600", marginBottom: 10 },
+  wrap: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", padding: 16 },
+  title: { fontSize: 22, fontWeight: "900", marginBottom: 16 },
+  grid: { width: "86%", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   btn: {
-    flex: 1,
-    minWidth: 90,
-    paddingVertical: 18,
-    borderRadius: 14,
-    borderWidth: 2,
+    width: "30%",
+    aspectRatio: 1.2,
+    backgroundColor: "#1565C0",
     borderColor: "#000",
+    borderWidth: 2,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 12,
   },
-  btnText: { fontSize: 20, fontWeight: "700" },
+  btnText: { color: "#FFF", fontSize: 22, fontWeight: "900" },
+  pressed: { opacity: 0.85 },
 });

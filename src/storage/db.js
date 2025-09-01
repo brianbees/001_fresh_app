@@ -1,101 +1,64 @@
-// src/storage/db.js — modern async expo-sqlite with safe fallbacks
-import * as SQLite from "expo-sqlite";
+import { Platform } from 'react-native';
 
-let _db;
-
-// Try the new async API first; fall back to legacy and polyfill
-async function openDb() {
-  if (_db) return _db;
-  if (SQLite.openDatabaseAsync) {
-    _db = await SQLite.openDatabaseAsync("uniapp2.db");
-    return _db;
-  }
-  // Legacy
-  _db = SQLite.openDatabase("uniapp2.db");
-  // Polyfill minimal async helpers on legacy DB
-  if (!_db.execAsync) {
-    _db.execAsync = (sql) =>
-      new Promise((resolve, reject) => {
-        _db.transaction((tx) => {
-          tx.executeSql(
-            sql,
-            [],
-            () => resolve(true),
-            (_, err) => {
-              reject(err);
-              return false;
-            }
-          );
-        });
-      });
-  }
-  if (!_db.runAsync) {
-    _db.runAsync = (sql, params = []) =>
-      new Promise((resolve, reject) => {
-        _db.transaction((tx) => {
-          tx.executeSql(
-            sql,
-            params,
-            (_, res) => resolve(res),
-            (_, err) => {
-              reject(err);
-              return false;
-            }
-          );
-        });
-      });
-  }
-  if (!_db.getAllAsync) {
-    _db.getAllAsync = (sql, params = []) =>
-      new Promise((resolve, reject) => {
-        _db.transaction((tx) => {
-          tx.executeSql(
-            sql,
-            params,
-            (_, res) => resolve(res.rows._array ?? []),
-            (_, err) => {
-              reject(err);
-              return false;
-            }
-          );
-        });
-      });
-  }
-  return _db;
+let SQLite = null;
+try {
+  SQLite = require('expo-sqlite');
+} catch (e) {
+  console.warn('expo-sqlite not available. DB disabled.');
 }
+
+let _db = null;
 
 export async function ensureDb() {
-  const db = await openDb();
-  await db.execAsync(`
-    PRAGMA journal_mode = WAL;
-    CREATE TABLE IF NOT EXISTS sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      started_at TEXT NOT NULL,
-      players INTEGER NOT NULL,
-      names TEXT,
-      scores TEXT,
-      total INTEGER DEFAULT 0
-    );
-  `);
-  return db;
+  if (!SQLite || !SQLite.openDatabaseAsync) {
+    console.warn('SQLite not available (or web). Skipping DB init.');
+    return false;
+  }
+  if (_db) return true;
+
+  try {
+    _db = await SQLite.openDatabaseAsync('uniapp2.db');
+    await _db.execAsync(`
+      PRAGMA journal_mode = WAL;
+      CREATE TABLE IF NOT EXISTS sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        created_at TEXT NOT NULL,
+        payload TEXT NOT NULL
+      );
+    `);
+    return true;
+  } catch (e) {
+    console.warn('DB init failed:', e?.message || e);
+    _db = null;
+    return false;
+  }
 }
 
-export async function createSession({ started_at, players, names, scores, total = 0 }) {
-  const db = await ensureDb();
-  await db.runAsync(
-    `INSERT INTO sessions (started_at, players, names, scores, total) VALUES (?, ?, ?, ?, ?)`,
-    [started_at, players, names, scores, total]
-  );
+export async function saveSession(sessionObj) {
+  const ok = await ensureDb();
+  if (!ok || !_db) return { ok: false, error: 'DB unavailable' };
+  try {
+    const created_at = new Date().toISOString();
+    const payload = JSON.stringify(sessionObj);
+    await _db.runAsync('INSERT INTO sessions (created_at, payload) VALUES (?, ?)', [created_at, payload]);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e?.message || String(e) };
+  }
 }
 
-export async function listSessions() {
-  const db = await ensureDb();
-  return await db.getAllAsync(
-    `SELECT id, started_at, players, names, scores, total FROM sessions ORDER BY id DESC`
-  );
-}
-
-export async function clearSessions() {
-  const db = await ensureDb();
-  await db.execAsync(`DELETE FROM sessions; VACUUM;`);
+export async function getSessions() {
+  const ok = await ensureDb();
+  if (!ok || !_db) return [];
+  try {
+    const rows = await _db.getAllAsync('SELECT * FROM sessions ORDER BY id DESC');
+    return rows.map(r => ({
+      id: r.id,
+      created_at: r.created_at,
+      data: (() => { try { return JSON.parse(r.payload); } catch { return null; }})()
+    }));
+  } catch (e) {
+    console.warn('getSessions failed:', e?.message || e);
+    return [];
+  }
 }
