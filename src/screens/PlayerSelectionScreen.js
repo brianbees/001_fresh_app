@@ -1,46 +1,52 @@
 ﻿import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styles, { COLORS } from "../../styles";
 
-export default function PlayerSelectionScreen() {
-  const nav = useNavigation();
-  const go = (players) => {
-    nav.navigate("MainTabs", { screen: "Score", params: { players } });
-  };
+export default function PlayerSelectionScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
+  const go = (n) => navigation.replace("MainTabs", { playerCount: n });
 
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.title}>Select Players</Text>
-      <View style={styles.grid}>
-        {[1,2,3,4,5,6].map((n) => (
-          <Pressable
-            key={n}
-            onPress={() => go(n)}
-            style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
-          >
-            <Text style={styles.btnText}>{n}</Text>
-          </Pressable>
-        ))}
+    <View style={styles.screen}>
+      <View style={[styles.headerWrap, { paddingTop: insets.top }]}>
+        <View style={styles.topRedBand}>
+          <Text style={styles.topRedText}>University Challenge Scoring App</Text>
+        </View>
+        <View style={styles.subNav}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Text style={styles.backBtnText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.subNavTitle}>Player Selection</Text>
+          <View style={{ width: 84 }} />
+        </View>
       </View>
+
+      <ScrollView contentContainerStyle={[styles.contentWrap, { paddingBottom: 24 }]}>
+        <Text style={{ color: "#fff", fontSize: 18, marginBottom: 12, fontWeight: "700" }}>
+          Select number of players:
+        </Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+          {[1,2,3,4,5,6].map((n) => (
+            <TouchableOpacity
+              key={n}
+              onPress={() => go(n)}
+              style={{
+                backgroundColor: COLORS.blueBtn,
+                borderColor: "#173b87",
+                borderWidth: 3,
+                borderRadius: 16,
+                paddingVertical: 16,
+                paddingHorizontal: 18,
+                width: "30%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 20, fontWeight: "900" }}>{n}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", padding: 16 },
-  title: { fontSize: 22, fontWeight: "900", marginBottom: 16 },
-  grid: { width: "86%", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  btn: {
-    width: "30%",
-    aspectRatio: 1.2,
-    backgroundColor: "#1565C0",
-    borderColor: "#000",
-    borderWidth: 2,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  btnText: { color: "#FFF", fontSize: 22, fontWeight: "900" },
-  pressed: { opacity: 0.85 },
-});

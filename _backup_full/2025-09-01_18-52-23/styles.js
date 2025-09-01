@@ -1,7 +1,7 @@
 ﻿/**
- * Uni App – 2 styles (gold look, safe-area compliant)
+ * Uni App – 2 styles (gold look)
  * Red header band, navy subnav/footer, white cards, blue tiles/buttons.
- * Footer hugs tab bar; header respects top inset.
+ * Safe-area friendly. No gradients.
  */
 import { StyleSheet } from "react-native";
 
@@ -26,11 +26,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: COLORS.bg,
-  },
-
-  /* Header shell lets us inject paddingTop: insets.top on the screen */
-  headerWrap: {
-    backgroundColor: "transparent",
   },
 
   // Top red band title
@@ -127,7 +122,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  // Big +10/+5 buttons (2 lines max)
+  // Big +10/+5 buttons
   rowBtns: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -136,7 +131,7 @@ const styles = StyleSheet.create({
   },
   bigBtn: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 14,
     borderWidth: 3,
     alignItems: "center",
@@ -148,9 +143,8 @@ const styles = StyleSheet.create({
   },
   bigBtnText: {
     color: COLORS.textLight,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "900",
-    lineHeight: 22,
     textAlign: "center",
   },
 
@@ -162,7 +156,7 @@ const styles = StyleSheet.create({
   },
   smallBtn: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 3,
     alignItems: "center",
@@ -178,22 +172,21 @@ const styles = StyleSheet.create({
   },
   smallText: {
     color: COLORS.textLight,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "800",
   },
 
-  // Floating footer above tab bar — anchored to bottom:0
+  // Floating footer above tab bar
   footerWrap: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,                 // HUG the bottom; inner padding adds insets.bottom
     backgroundColor: COLORS.navy,
     borderTopWidth: 2,
     borderTopColor: COLORS.border,
     paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 12,         // will be += insets.bottom in-code
+    paddingBottom: 12,
     zIndex: 20,
     elevation: 8,
   },

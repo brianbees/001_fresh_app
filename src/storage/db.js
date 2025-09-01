@@ -1,64 +1,100 @@
-import { Platform } from 'react-native';
+import * as SQLite from "expo-sqlite";
 
-let SQLite = null;
-try {
-  SQLite = require('expo-sqlite');
-} catch (e) {
-  console.warn('expo-sqlite not available. DB disabled.');
+/**
+ * SQLite helpers (promise-wrapped)
+ */
+let _db;
+
+function getDB() {
+  if (!_db) {
+    _db = SQLite.openDatabase("uniapp2.db");
+  }
+  return _db;
 }
 
-let _db = null;
-
-export async function ensureDb() {
-  if (!SQLite || !SQLite.openDatabaseAsync) {
-    console.warn('SQLite not available (or web). Skipping DB init.');
-    return false;
-  }
-  if (_db) return true;
-
-  try {
-    _db = await SQLite.openDatabaseAsync('uniapp2.db');
-    await _db.execAsync(`
-      PRAGMA journal_mode = WAL;
-      CREATE TABLE IF NOT EXISTS sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at TEXT NOT NULL,
-        payload TEXT NOT NULL
+function execSql(sql, params = []) {
+  const db = getDB();
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        sql,
+        params,
+        (_tx, result) => resolve(result),
+        (_tx, error) => {
+          reject(error);
+          return true;
+        }
       );
-    `);
-    return true;
-  } catch (e) {
-    console.warn('DB init failed:', e?.message || e);
-    _db = null;
-    return false;
-  }
+    });
+  });
 }
 
-export async function saveSession(sessionObj) {
-  const ok = await ensureDb();
-  if (!ok || !_db) return { ok: false, error: 'DB unavailable' };
-  try {
-    const created_at = new Date().toISOString();
-    const payload = JSON.stringify(sessionObj);
-    await _db.runAsync('INSERT INTO sessions (created_at, payload) VALUES (?, ?)', [created_at, payload]);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e?.message || String(e) };
-  }
+/**
+ * Initialize schema
+ * sessions: id, created_at (ISO), data (JSON string)
+ */
+export async function initDB() {
+  await execSql(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT NOT NULL,
+      data TEXT NOT NULL
+    )
+  `);
 }
 
-export async function getSessions() {
-  const ok = await ensureDb();
-  if (!ok || !_db) return [];
-  try {
-    const rows = await _db.getAllAsync('SELECT * FROM sessions ORDER BY id DESC');
-    return rows.map(r => ({
-      id: r.id,
-      created_at: r.created_at,
-      data: (() => { try { return JSON.parse(r.payload); } catch { return null; }})()
-    }));
-  } catch (e) {
-    console.warn('getSessions failed:', e?.message || e);
-    return [];
+/**
+ * Save a match object. Expecting shape:
+ * {
+ *   timestamp: "ISO",
+ *   players: [{ name: string, score: number }, ...]
+ * }
+ */
+export async function saveSession(matchObj) {
+  const createdAt = matchObj?.timestamp || new Date().toISOString();
+  const data = JSON.stringify(matchObj);
+  await initDB();
+  const res = await execSql(
+    "INSERT INTO sessions (created_at, data) VALUES (?, ?)",
+    [createdAt, data]
+  );
+  return { insertId: res.insertId };
+}
+
+/**
+ * Get sessions newest-first.
+ * Returns array with parsed data:
+ * [{ id, created_at, data: { timestamp, players:[...] } }, ...]
+ */
+export async function getSessions(limit = 100) {
+  await initDB();
+  const res = await execSql(
+    `SELECT id, created_at, data FROM sessions ORDER BY id DESC LIMIT ?`,
+    [limit]
+  );
+  const out = [];
+  const rows = res?.rows || { length: 0, item: () => null };
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows.item(i);
+    let parsed = null;
+    try {
+      parsed = JSON.parse(row.data);
+    } catch (_) {
+      parsed = { raw: row.data };
+    }
+    out.push({
+      id: row.id,
+      created_at: row.created_at,
+      data: parsed,
+    });
   }
+  return out;
+}
+
+/**
+ * Optional: clear all (manual testing)
+ */
+export async function clearSessions() {
+  await initDB();
+  await execSql("DELETE FROM sessions");
 }
