@@ -35,3 +35,18 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+# Expo shared settings
+.expo-shared/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+
+# Backups (your naming convention)
+*_backup/
+* - renamed/
+older folders/
