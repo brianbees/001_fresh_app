@@ -1,5 +1,6 @@
-{
-  "devBuild": 2,
+﻿{
+  "version": "1.0.1",
+  "devBuild": "dev.2",
   "timestamp": "2025-09-02 09:00",
   "commit": "local"
 }

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DevVersionPill from "../components/DevVersionPill";

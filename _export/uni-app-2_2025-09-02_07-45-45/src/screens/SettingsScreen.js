@@ -6,15 +6,12 @@ import styles from '../../styles';
 export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.appContainer} edges={['top','bottom']}>
-      <View style={[styles.screen, { backgroundColor: '#fff', padding: 16 }]}>
+      <View style={[styles.screen]}>
         <Text style={styles.h1}>Settings</Text>
         <Text style={[styles.p, { marginTop: 8 }]}>
           Send feedback or suggestions so we can improve the app.
         </Text>
-
-        <Pressable
-          onPress={() => Linking.openURL('mailto:developer@example.com?subject=Uni%20App%202%20Feedback')}
-          style={[styles.pillButton, { marginTop: 12 }]}>
+        <Pressable onPress={() => Linking.openURL('mailto:developer@example.com?subject=Uni%20App%202%20Feedback')} style={[styles.pillButton, { marginTop: 12 }]}>
           <Text style={styles.pillText}>Email Feedback</Text>
         </Pressable>
 

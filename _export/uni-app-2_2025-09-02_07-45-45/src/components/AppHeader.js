@@ -1,13 +1,16 @@
-import React from "react";
+﻿import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AppHeader({ title = "Scoring", onBack }) {
   return (
     <View style={styles.wrapper} pointerEvents="box-none">
-      {/* Red brand band */}
-      <View style={styles.brandBand}>
-        <Text style={styles.brandText}>University Challenge Scoring App</Text>
-      </View>
+      {/* Red brand band includes status bar safe area */}
+      <SafeAreaView edges={["top"]} style={styles.brandSafe}>
+        <View style={styles.brandBand}>
+          <Text style={styles.brandText}>University Challenge Scoring App</Text>
+        </View>
+      </SafeAreaView>
 
       {/* Navy toolbar */}
       <View style={styles.toolbar}>
@@ -22,9 +25,11 @@ export default function AppHeader({ title = "Scoring", onBack }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { },
-  brandBand: { backgroundColor: "#CC2222", alignItems: "center", justifyContent: "center", paddingVertical: 8 },
+  wrapper: { position: "relative" },
+  brandSafe: { backgroundColor: "#CC2222" },
+  brandBand: { alignItems: "center", justifyContent: "center", paddingVertical: 8 },
   brandText: { color: "#fff", fontWeight: "800", fontSize: 14 },
+
   toolbar: {
     height: 44,
     backgroundColor: "#0f1e36",

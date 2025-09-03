@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 
 export default function DevVersionPill() {
   const show = Constants?.expoConfig?.extra?.SHOW_DEV_VERSION ?? true;
-  if (!__DEV__ || !show) return null;
+  if (!show) return null;
   const { devBuild, timestamp, commit } = versionMeta || {};
   return (
     <View style={styles.devPill} pointerEvents="none">

@@ -1,4 +1,4 @@
-import * as SQLite from "expo-sqlite";
+﻿import * as SQLite from "expo-sqlite";
 
 let _db;
 function getDB() {
@@ -23,11 +23,11 @@ function execSql(sql, params = []) {
 // Schema: id, created_at (ISO), data (JSON)
 export async function initDB() {
   await execSql(
-    `CREATE TABLE IF NOT EXISTS sessions (
+    CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at TEXT NOT NULL,
       data TEXT NOT NULL
-    );`
+    )
   );
 }
 
@@ -45,7 +45,7 @@ export async function saveSession(matchObj) {
 export async function getSessions(limit = 100) {
   await initDB();
   const res = await execSql(
-    "SELECT id, created_at, data FROM sessions ORDER BY id DESC LIMIT ?",
+    SELECT id, created_at, data FROM sessions ORDER BY id DESC LIMIT ?,
     [limit]
   );
   const out = [];

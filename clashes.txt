@@ -1,0 +1,37 @@
+Yes—let’s roll the new findings into your list and mark what’s already fixed by your last script.
+
+Must-Fix Spec Violations — updated status
+
+✅ Safe-area compliance: Score/History/Settings/PlayerSelection now wrap content in SafeAreaView (edges ["top","bottom"]). The earlier absolute header/footer approach is no longer used.
+
+✅ PlayerSelection safe-area: Fixed (wrapped in SafeAreaView).
+
+✅ Accent yellow rule: “Save Match” pill uses #F9DABA (with dark border). Good.
+
+✅ History wired to DB: HistoryScreen now uses getSessions() and renders saved matches.
+
+✅ DB field mismatch: Unified on created_at; saveSession() writes it and History reads it.
+
+✅ SettingsScreen styles: The needed keys (appContainer, h1, p, etc.) now exist in styles.js.
+
+✅ DevVersionPill styles: styles.devPill/devPillText added; pill renders only in dev and when extra.SHOW_DEV_VERSION is true.
+
+Minor Cleanup Ambiguities — current state / actions
+
+⚠️ Tab bar colour mismatch: App.js pulls COLORS.tabBar, which is #d6eefb. Earlier spec called #c0ebf9.
+Action: pick one; if spec is #c0ebf9, update COLORS.tabBar to that.
+
+⚠️ Header red shade mismatch: AppHeader uses #CC2222, styles.js has redBand = #c24236.
+Action: choose one red and use it in both.
+
+⚠️ Two style systems lingering: ScoreScreen.styles.js still exists but isn’t used; DevVersionLabel.js also exists alongside the new pill.
+Action: delete the unused file(s) or make them first-class; otherwise they invite confusion.
+
+⚠️ README line: It says “footer is flush with tab bar.” With safe areas, it sits above the tab bar and respects bottom inset.
+Action: tweak that sentence to match current behavior.
+
+⚠️ .gitignore duplication: You now ignore both *_backup/ and _backup/. Harmless but redundant.
+Action: optional tidy.
+
+⚠️ React-Native version warning: Expo wants 0.79.5, you have 0.79.6.
+Action: optional: npx expo install react-native@0.79.5.

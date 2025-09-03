@@ -1,22 +1,16 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import AppHeader from "../components/AppHeader";
 import { saveSession } from "../storage/db";
 
 const LETTERS = ["A","B","C","D","E","F"];
 function buildPlayers(count) {
   const n = Math.max(1, Math.min(6, count || 4));
-  return Array.from({ length: n }, (_, i) => ({
-    name: `Player ${LETTERS[i] || i+1}`,
-    score: 0
-  }));
+  return Array.from({ length: n }, (_, i) => ({ name: Player , score: 0 }));
 }
 
 export default function ScoreScreen({ route, navigation }) {
-  const tabBarHeight = useBottomTabBarHeight();
-
   const routePlayers = Array.isArray(route?.params?.players)
     ? route.params.players.map(p => ({ name: p.name ?? String(p), score: Number(p.score) || 0 }))
     : null;
@@ -24,10 +18,6 @@ export default function ScoreScreen({ route, navigation }) {
 
   const initialPlayers = routePlayers ?? buildPlayers(playerCount ?? 4);
   const [players, setPlayers] = useState(initialPlayers);
-
-  // Measure footer so content never hides beneath it
-  const EST = { padTop: 10, padBot: 12, btnH: 48 };
-  const [footerH, setFooterH] = useState(EST.padTop + EST.padBot + EST.btnH);
 
   const increment = (idx, delta) =>
     setPlayers(prev => {
@@ -84,24 +74,14 @@ export default function ScoreScreen({ route, navigation }) {
     );
   };
 
-  // Footer floats just above tab bar with a tiny gap
-  const footerBottom = tabBarHeight + 6; // tabBarHeight excludes the outer safe-area spacer in App.js
-
-  // Ensure the last card never hides under the floating footer
-  const extraBottomPadding = footerBottom + footerH + 12;
-
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
+    <SafeAreaView style={styles.safe} edges={["top","bottom"]}>
       <AppHeader title="Scoring" onBack={() => {
         try { navigation?.navigate?.("PlayerSelection"); } catch { navigation?.goBack?.(); }
       }} />
 
       <View style={styles.content}>
-        <ScrollView
-          key={`${footerH}-${footerBottom}`}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.contentInner, { paddingBottom: extraBottomPadding }]}
-        >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentInner}>
           <View style={styles.grid}>
             {players.map((p, idx) => (
               <View key={idx} style={styles.card}>
@@ -127,17 +107,12 @@ export default function ScoreScreen({ route, navigation }) {
                 </View>
               </View>
             ))}
-
-            {/* Final spacer as a failsafe on slow layout devices */}
-            <View style={{ height: footerH + footerBottom + 16 }} />
           </View>
         </ScrollView>
       </View>
 
-      <View
-        style={[styles.footer, { position: "absolute", left: 0, right: 0, bottom: footerBottom }]}
-        onLayout={e => setFooterH(e.nativeEvent.layout.height)}
-      >
+      {/* Footer (sits above tab bar via SafeAreaView bottom inset) */}
+      <View style={styles.footer}>
         <Pressable style={[styles.cta, styles.ctaSave]} onPress={onSaveMatch}>
           <Text style={styles.ctaSaveText}>Save Match</Text>
         </Pressable>
@@ -164,26 +139,30 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 18, fontWeight: "700", marginBottom: 8 },
   score: { fontSize: 36, fontWeight: "800", marginBottom: 10 },
+
   row: { flexDirection: "row", justifyContent: "space-between" },
-  actBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center", justifyContent: "center", marginRight: 6 },
+
+  actBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 10,
+    alignItems: "center", justifyContent: "center", marginRight: 6,
+  },
   btnPrimary: { backgroundColor: "#2f58b7" },
   btnSecondary:{ backgroundColor: "#3b6fe0" },
   actTxt: { fontSize: 14, fontWeight: "700", color: "#fff" },
-  smallBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center", justifyContent: "center", marginRight: 6, marginTop: 8 },
+
+  smallBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 10,
+    alignItems: "center", justifyContent: "center", marginRight: 6, marginTop: 8,
+  },
   btnUndo:  { backgroundColor: "#2f3338" },
   btnReset: { backgroundColor: "#9ba3ae" },
   smallTxt: { fontSize: 14, fontWeight: "700", color: "#fff" },
 
-  // Footer bar (floating)
   footer: {
     backgroundColor: "#0f1e36",
-    borderTopWidth: 1,
-    borderTopColor: "#000",
-    paddingTop: 10,
-    paddingBottom: 12,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    justifyContent: "space-between"
+    borderTopWidth: 1, borderTopColor: "#000",
+    paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16,
+    flexDirection: "row", justifyContent: "space-between",
   },
   cta: { flex: 1, borderRadius: 18, paddingVertical: 12, alignItems: "center", justifyContent: "center" },
   ctaSave: { backgroundColor: "#F9DABA", marginRight: 8, borderWidth: 1, borderColor: "#a68050" },
