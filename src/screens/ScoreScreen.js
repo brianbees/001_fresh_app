@@ -85,12 +85,10 @@ export default function ScoreScreen({ route, navigation }) {
   };
 
   // Footer floats just above tab bar with a tiny gap
-  const footerBottom = tabBarHeight + 6; // tabBarHeight excludes the outer safe-area spacer in App.js
+  const footerBottom = tabBarHeight; // tabBarHeight excludes the outer safe-area spacer in App.js
 
   // Ensure the last card never hides under the floating footer
-  const extraBottomPadding = footerBottom + footerH + 12;
-
-  return (
+const extraBottomPadding = Math.max(footerH - tabBarHeight, 12);  return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <AppHeader title="Scoring" onBack={() => {
         try { navigation?.navigate?.("PlayerSelection"); } catch { navigation?.goBack?.(); }
@@ -100,8 +98,10 @@ export default function ScoreScreen({ route, navigation }) {
         <ScrollView
           key={`${footerH}-${footerBottom}`}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.contentInner, { paddingBottom: extraBottomPadding }]}
-        >
+contentContainerStyle={{
+  ...styles.contentInner,
+  paddingBottom: 12
+}}      >
           <View style={styles.grid}>
             {players.map((p, idx) => (
               <View key={idx} style={styles.card}>
@@ -129,15 +129,15 @@ export default function ScoreScreen({ route, navigation }) {
             ))}
 
             {/* Final spacer as a failsafe on slow layout devices */}
-            <View style={{ height: footerH + footerBottom + 16 }} />
-          </View>
+   {/* Optional: Reduce spacer height or remove entirely */}
+            {/* <View style={{ height: 24 }} /> */}          </View>
         </ScrollView>
       </View>
 
       <View
-        style={[styles.footer, { position: "absolute", left: 0, right: 0, bottom: footerBottom }]}
-        onLayout={e => setFooterH(e.nativeEvent.layout.height)}
-      >
+  style={[styles.footer, { position: "absolute", left: 0, right: 0, bottom: 0 }]}
+  onLayout={e => setFooterH(e.nativeEvent.layout.height)}
+>
         <Pressable style={[styles.cta, styles.ctaSave]} onPress={onSaveMatch}>
           <Text style={styles.ctaSaveText}>Save Match</Text>
         </Pressable>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingHorizontal: 16,
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   cta: { flex: 1, borderRadius: 18, paddingVertical: 12, alignItems: "center", justifyContent: "center" },
   ctaSave: { backgroundColor: "#F9DABA", marginRight: 8, borderWidth: 1, borderColor: "#a68050" },

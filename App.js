@@ -20,7 +20,7 @@ function MainTabs() {
   const bottomInset = Math.max(insets.bottom, 6); // visible safe-area strip below the tab bar
 
   return (
-    <View style={{ flex: 1, paddingBottom: bottomInset, backgroundColor: COLORS.appBg || "#eef4fa" }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.appBg || "#eef4fa" }}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
